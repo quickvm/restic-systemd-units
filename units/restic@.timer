@@ -1,0 +1,11 @@
+[Unit]
+Description=Run restic@%i.service at set intervals
+
+[Timer]
+Persistent=true
+OnStartupSec=5m
+OnUnitActiveSec=1hr
+RandomizedDelaySec=15m
+
+[Install]
+WantedBy=timers.target

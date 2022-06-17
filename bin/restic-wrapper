@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+#
+# Copyright (c) 2022 QuickVM, LLC <contact@quickvm.com> All Rights Reserved.
+
+set -e
+
+RESTIC_CONFIG_FILE=${1}
+shift
+
+if [[ -f "${RESTIC_CONFIG_FILE}" ]] && [[ -r "${RESTIC_CONFIG_FILE}" ]]; then
+
+  source <(sed -E -n 's/[^#]+/export &/ p' "${RESTIC_CONFIG_FILE}")
+
+  eval "restic $@"
+
+else
+
+  echo "Could not read ${RESTIC_CONFIG_FILE} or it does not exist!"
+  exit 1
+
+fi

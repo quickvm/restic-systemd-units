@@ -1,0 +1,15 @@
+[Unit]
+Description=Restic backup service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/restic/%i.conf
+RuntimeDirectory=restic
+CacheDirectory=restic
+CacheDirectoryMode=0700
+
+ExecStart=restic backup --cache-dir /var/cache/restic/%i --verbose --one-file-system --tag %i  $RESTIC_BACKUP_EXCLUDES $RESTIC_BACKUP_PATHS
+ExecStartPost=restic forget --cache-dir /var/cache/restic/%i --prune --verbose --tag %i --group-by "paths,tags" $RESTIC_RETENTION_POLICY
+ExecStartPost=restic check --cache-dir /var/cache/restic/%i
