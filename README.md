@@ -193,6 +193,57 @@ OnFailure=blazon@%N.service
 
 Now you should get desktop notifications and a Slack message if any of your backups units fail!
 
+## Ignore 3/NOTIMPLEMENTED exit codes
+
+You may see failures on your backups like the one below. 
+
+```
+[root@sw-0608 ~]# journalctl --since "10 minutes ago" -u restic@local.service
+Jul 13 10:32:32 sw-0608 systemd[1]: Starting restic@local.service - Restic backup service...
+Jul 13 10:32:32 sw-0608 restic[1369163]: open repository
+Jul 13 10:32:33 sw-0608 restic[1369163]: lock repository
+Jul 13 10:32:33 sw-0608 restic[1369163]: load index files
+Jul 13 10:32:34 sw-0608 restic[1369163]: using parent snapshot 44eafc84
+Jul 13 10:32:34 sw-0608 restic[1369163]: start scan on [/home/jdoss]
+Jul 13 10:32:34 sw-0608 restic[1369163]: start backup on [/home/jdoss]
+Jul 13 10:32:58 sw-0608 restic[1369163]: error: lstat /home/jdoss/Documents/projects/iotpod/victoriametrics/data/data/small/2022_07/143344_4355_20220713152308.202_20220713152853.292_1700E4A397107AD4: no such file >
+Jul 13 10:32:58 sw-0608 restic[1369163]: error: lstat /home/jdoss/Documents/projects/iotpod/victoriametrics/data/data/small/2022_07/146308_4355_20220713145838.202_20220713150413.292_1700E4A3971079A0: no such file >
+Jul 13 10:32:58 sw-0608 restic[1369163]: error: lstat /home/jdoss/Documents/projects/iotpod/victoriametrics/data/data/small/2022_07/146344_4355_20220713145138.202_20220713145713.292_1700E4A397107946: no such file >
+Jul 13 10:32:58 sw-0608 restic[1369163]: error: lstat /home/jdoss/Documents/projects/iotpod/victoriametrics/data/data/small/2022_07/172967_4355_20220713151608.202_20220713152323.292_1700E4A397107A8D: no such file >
+Jul 13 10:32:58 sw-0608 restic[1369163]: error: lstat /home/jdoss/Documents/projects/iotpod/victoriametrics/data/data/small/2022_07/173003_4355_20220713150908.202_20220713151643.292_1700E4A397107A3B: no such file >
+Jul 13 10:32:58 sw-0608 restic[1369163]: error: lstat /home/jdoss/Documents/projects/iotpod/victoriametrics/data/data/small/2022_07/180628_4355_20220713144358.202_20220713145133.292_1700E4A3971078FE: no such file >
+Jul 13 10:32:58 sw-0608 restic[1369163]: error: lstat /home/jdoss/Documents/projects/iotpod/victoriametrics/data/data/small/2022_07/26623_4355_20220713153108.202_20220713153208.202_1700E4A397107AFC: no such file o>
+Jul 13 10:32:58 sw-0608 restic[1369163]: error: lstat /home/jdoss/Documents/projects/iotpod/victoriametrics/data/data/small/2022_07/27296_4355_20220713152758.202_20220713152958.202_1700E4A397107AE2: no such file o>
+Jul 13 10:32:58 sw-0608 restic[1369163]: error: lstat /home/jdoss/Documents/projects/iotpod/victoriametrics/data/data/small/2022_07/29596_4355_20220713153002.736_20220713153103.292_1700E4A397107AEF: no such file o>
+Jul 13 10:32:58 sw-0608 restic[1369163]: error: lstat /home/jdoss/Documents/projects/iotpod/victoriametrics/data/data/small/2022_07/3646_3646_20220713153212.736_20220713153213.292_1700E4A397107AFD: no such file or>
+Jul 13 10:32:58 sw-0608 restic[1369163]: error: lstat /home/jdoss/Documents/projects/iotpod/victoriametrics/data/data/small/2022_07/3646_3646_20220713153222.736_20220713153223.292_1700E4A397107AFF: no such file or>
+Jul 13 10:32:58 sw-0608 restic[1369163]: error: lstat /home/jdoss/Documents/projects/iotpod/victoriametrics/data/data/small/2022_07/3655_3655_20220713153235.218_20220713153243.292_1700E4A397107B03: no such file or>
+Jul 13 10:33:52 sw-0608 restic[1369163]: scan finished in 79.638s: 1167623 files, 143.294 GiB
+Jul 13 10:34:59 sw-0608 restic[1369163]: Files:         134 new,   408 changed, 1167037 unmodified
+Jul 13 10:34:59 sw-0608 restic[1369163]: Dirs:           50 new,   236 changed, 186695 unmodified
+Jul 13 10:34:59 sw-0608 restic[1369163]: Data Blobs:    775 new
+Jul 13 10:34:59 sw-0608 restic[1369163]: Tree Blobs:    271 new
+Jul 13 10:34:59 sw-0608 restic[1369163]: Added to the repo: 329.317 MiB
+Jul 13 10:34:59 sw-0608 restic[1369163]: processed 1167579 files, 143.293 GiB in 2:26
+Jul 13 10:34:59 sw-0608 restic[1369163]: snapshot db22c2c7 saved
+Jul 13 10:34:59 sw-0608 restic[1369163]: Warning: at least one source file could not be read
+Jul 13 10:34:59 sw-0608 systemd[1]: restic@local.service: Main process exited, code=exited, status=3/NOTIMPLEMENTED
+Jul 13 10:34:59 sw-0608 systemd[1]: restic@local.service: Failed with result 'exit-code'.
+Jul 13 10:34:59 sw-0608 systemd[1]: Failed to start restic@local.service - Restic backup service.
+Jul 13 10:34:59 sw-0608 systemd[1]: restic@local.service: Triggering OnFailure= dependencies.
+
+```
+
+This is when the restic backup run exits with an exit code of `3/NOTIMPLEMENTED` when it scans your files at the start but one or more files are removed by the time it gets to them to back them up. You can ignore this exit code by adding:
+
+```
+[Service]
+SuccessExitStatus=3
+```
+
+as a systemd override to your backup unit. This will still log the errors about the files not being able to be backed up, but it will not fail the systemd unit. 
+
+
 # License
 
 MIT License
